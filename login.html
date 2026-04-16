@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Login Amendoza</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0d0d0f;
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  background:#141416;
+  padding:25px;
+  border-radius:14px;
+  width:320px;
+  border:1px solid #222;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:6px 0;
+  border-radius:8px;
+  border:1px solid #333;
+  background:#1c1c20;
+  color:#fff;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  background:#a28fff;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.captcha{
+  text-align:center;
+  background:#1c1c20;
+  padding:8px;
+  margin:6px 0;
+  border-radius:8px;
+  font-weight:bold;
+}
+
+.bar{
+  height:6px;
+  background:#222;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:12px;
+}
+
+.fill{
+  height:100%;
+  width:100%;
+  background:#6fdfb8;
+}
+
+.timer{
+  text-align:center;
+  margin-top:8px;
+  font-size:13px;
+  color:#6fdfb8;
+}
+
+.hidden{display:none}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div class="card" id="loginBox">
+  <h2>Login</h2>
+
+  <input id="user" placeholder="Usuario">
+  <input id="pass" type="password" placeholder="Contraseña">
+
+  <div class="captcha" id="captchaText"></div>
+  <input id="captchaInput" placeholder="Resultado">
+
+  <button onclick="login()">Entrar</button>
+</div>
+
+<!-- HOME -->
+<div class="card hidden" id="homeBox">
+  <h2 id="welcome"></h2>
+
+  <div class="bar">
+    <div class="fill" id="fill"></div>
+  </div>
+
+  <div class="timer" id="timer">120s restantes</div>
+
+  <button onclick="logout()">Salir</button>
+</div>
+
+<script>
+const DB = {
+  Amendoza: "12341234"
+};
+
+let captchaAnswer = 0;
+let time = 120;
+let interval;
+
+// CAPTCHA
+function generateCaptcha(){
+  const a = Math.floor(Math.random()*10);
+  const b = Math.floor(Math.random()*10);
+  captchaAnswer = a + b;
+  captchaText.innerText = `${a} + ${b} = ?`;
+}
+
+generateCaptcha();
+
+function login(){
+  const u = user.value.trim();
+  const p = pass.value;
+  const c = captchaInput.value;
+
+  if(parseInt(c) !== captchaAnswer){
+    alert("CAPTCHA incorrecto");
+    generateCaptcha();
+    return;
+  }
+
+  if(!DB[u] || DB[u] !== p){
+    alert("Usuario o contraseña incorrectos");
+    return;
+  }
+
+  welcome.innerText = "Bienvenido " + u;
+  showHome();
+  startTimer();
+}
+
+function showHome(){
+  loginBox.classList.add("hidden");
+  homeBox.classList.remove("hidden");
+}
+
+function startTimer(){
+  clearInterval(interval);
+  time = 120;
+
+  interval = setInterval(()=>{
+    time--;
+
+    timer.innerText = time + "min restantes";
+    fill.style.width = (time/20)*100 + "%";
+
+    if(time <= 0){
+      clearInterval(interval);
+      alert("Sesión expirada");
+      logout();
+    }
+  },1000);
+}
+
+function logout(){
+  clearInterval(interval);
+  showHome();
+  loginBox.classList.remove("hidden");
+  homeBox.classList.add("hidden");
+  generateCaptcha();
+}
+</script>
+
+</body>
+</html>
+</html>

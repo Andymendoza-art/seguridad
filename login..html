@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Login con minutos visibles</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#0d0d0f;
+  color:#fff;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  height:100vh;
+}
+
+.card{
+  background:#141416;
+  padding:25px;
+  border-radius:14px;
+  width:320px;
+  border:1px solid #222;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border-radius:8px;
+  border:1px solid #333;
+  background:#1c1c20;
+  color:#fff;
+}
+
+button{
+  width:100%;
+  padding:10px;
+  margin-top:10px;
+  border:none;
+  border-radius:8px;
+  background:#a28fff;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.step{display:none}
+.active{display:block}
+
+.captcha{
+  text-align:center;
+  background:#1c1c20;
+  padding:8px;
+  border-radius:8px;
+  margin:6px 0;
+  font-weight:bold;
+}
+
+.bar{
+  height:6px;
+  background:#222;
+  border-radius:10px;
+  overflow:hidden;
+  margin-top:12px;
+}
+
+.fill{
+  height:100%;
+  width:100%;
+  background:#6fdfb8;
+}
+
+.timer{
+  text-align:center;
+  margin-top:8px;
+  font-size:14px;
+  color:#6fdfb8;
+  font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+  <h2>Login</h2>
+
+  <!-- PASO 1 -->
+  <div id="step1" class="step active">
+    <input id="user" placeholder="Usuario">
+    <button onclick="next1()">Siguiente</button>
+  </div>
+
+  <!-- PASO 2 -->
+  <div id="step2" class="step">
+    <input id="pass" type="password" placeholder="Contraseña">
+    <button onclick="next2()">Siguiente</button>
+  </div>
+
+  <!-- PASO 3 -->
+  <div id="step3" class="step">
+    <div class="captcha" id="captchaText"></div>
+    <input id="captchaInput" placeholder="Resultado">
+    <button onclick="login()">Entrar</button>
+  </div>
+
+</div>
+
+<!-- HOME -->
+<div class="card" id="homeBox" style="display:none">
+
+  <h2 id="welcome"></h2>
+
+  <div class="bar">
+    <div class="fill" id="fill"></div>
+  </div>
+
+  <div class="timer" id="timer">2:00</div>
+
+  <button onclick="logout()">Salir</button>
+</div>
+
+<script>
+const DB = {
+  Amendoza: "12341234"
+};
+
+let stepUser = "";
+let stepPass = "";
+
+let captchaAnswer = 0;
+
+// tiempo en segundos (2 minutos)
+let time = 120;
+let interval;
+
+// CAPTCHA
+function generateCaptcha(){
+  const a = Math.floor(Math.random()*10);
+  const b = Math.floor(Math.random()*10);
+  captchaAnswer = a + b;
+  captchaText.innerText = `${a} + ${b} = ?`;
+}
+
+generateCaptcha();
+
+// PASO 1
+function next1(){
+  if(!user.value){
+    alert("Escribe usuario");
+    return;
+  }
+  stepUser = user.value.trim();
+  step1.classList.remove("active");
+  step2.classList.add("active");
+}
+
+// PASO 2
+function next2(){
+  if(!pass.value){
+    alert("Escribe contraseña");
+    return;
+  }
+  stepPass = pass.value;
+  step2.classList.remove("active");
+  step3.classList.add("active");
+}
+
+// LOGIN FINAL
+function login(){
+  if(parseInt(captchaInput.value) !== captchaAnswer){
+    alert("CAPTCHA incorrecto");
+    generateCaptcha();
+    return;
+  }
+
+  if(!DB[stepUser] || DB[stepUser] !== stepPass){
+    alert("Datos incorrectos");
+    return;
+  }
+
+  welcome.innerText = "Bienvenido " + stepUser;
+
+  document.querySelector(".card").style.display = "none";
+  homeBox.style.display = "block";
+
+  startTimer();
+}
+
+// TIMER REAL 2 MIN (mm:ss)
+function startTimer(){
+  clearInterval(interval);
+  time = 120;
+
+  interval = setInterval(()=>{
+    time--;
+
+    let min = Math.floor(time / 60);
+    let sec = time % 60;
+
+    if(sec < 10) sec = "0" + sec;
+
+    timer.innerText = `${min}:${sec}`;
+
+    fill.style.width = (time/120)*100 + "%";
+
+    if(time <= 0){
+      clearInterval(interval);
+      alert("Sesión expirada");
+      logout();
+    }
+  },1000);
+}
+
+// LOGOUT
+function logout(){
+  clearInterval(interval);
+  location.reload();
+}
+</script>
+
+</body>
+</html>
